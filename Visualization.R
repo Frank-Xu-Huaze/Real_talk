@@ -10,7 +10,7 @@ library(RColorBrewer)
 
 # Reading samples
 sample <- read.csv("Real_Talk_Data.csv", stringsAsFactors = FALSE)
-sample <- sample[1:811,]
+sample <- sample[1:812,]
 colnames(sample)[13] <- "zip"
 sample$zip[sample$zip < 10000 & is.na(sample$zip) == F] <- 
   sprintf("%05d", sample$zip[sample$zip < 10000 & is.na(sample$zip) == F])
