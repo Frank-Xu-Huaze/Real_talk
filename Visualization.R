@@ -18,6 +18,29 @@ sample <- sample[ , colSums(!is.na(sample)) != 0]
 sample$Story <- do.call(paste, c(sample[18:127], sep=" "))
 sample <- sample[,c(1:17,128)]
 
+# Clean up
+sample$LGBTQ.[sample$LGBTQ. == ""] <- NA
+sample$LGBTQ.[sample$LGBTQ. == "nyes"] <- "yes"
+sample$LGBTQ.[sample$LGBTQ. == "yes "] <- "yes"
+sample$LGBTQ.[sample$LGBTQ. == "on"] <- "no"
+
+# Create a new column of state with zip
+data(zipcode)
+zip <- zipcode %>% 
+  select(zip, state) %>% 
+  distinct(zip, .keep_all = TRUE)
+sample <- merge(sample, zip, by = "zip", all.x = TRUE)
+
+# Summary datasets:
+summary(as.factor(sample$Submission..Type))
+summary(as.factor(sample$Published))
+summary(as.factor(sample$Gender))
+boxplot(sample$Age)
+
+
+
+
+
 # Using Tidytext to unnest the dataframe
 sampledf <- sample %>% 
   select(Story) %>% 
@@ -28,6 +51,16 @@ samplesort <- sampledf %>%
   anti_join(stop_words) %>% 
   count(word) %>% 
   arrange(desc(n))
+# Creating Corpus
+sample_corpus <- Corpus(VectorSource(as.vector(sample$Story))) 
+sample_corpus <- tm_map(sample_corpus, removeWords, stopwords("english"))
+sample_corpus <- tm_map(sample_corpus, content_transformer(removeNumbers))
+sample_corpus <- tm_map(sample_corpus, content_transformer(removePunctuation))
+sample_corpus <- tm_map(sample_corpus, content_transformer(tolower))
+sample_corpus <- tm_map(sample_corpus, content_transformer(stemDocument), language = "english")
+# Creating dtm
+DTM <- DocumentTermMatrix(sample_corpus, control = list(wordLengths = c(2, Inf)))
+TDM <- TermDocumentMatrix(sample_corpus, control = list(wordLengths = c(2, Inf)))
 
 # Graphing1: top 20 words in histogram
 top_20 <- samplesort[1:20,]
@@ -42,16 +75,6 @@ ggplot(top_20, aes(x=word, y=n, fill=word))+
   guides(fill=FALSE)
 
 # Graphing2: Corpus & Topic modeling
-# Creating Corpus
-sample_corpus <- Corpus(VectorSource(as.vector(sample$Story))) 
-sample_corpus <- tm_map(sample_corpus, removeWords, stopwords("english"))
-sample_corpus <- tm_map(sample_corpus, content_transformer(removeNumbers))
-sample_corpus <- tm_map(sample_corpus, content_transformer(removePunctuation))
-sample_corpus <- tm_map(sample_corpus, content_transformer(tolower))
-sample_corpus <- tm_map(sample_corpus, content_transformer(stemDocument), language = "english")
-# Creating dtm
-DTM <- DocumentTermMatrix(sample_corpus, control = list(wordLengths = c(2, Inf)))
-TDM <- TermDocumentMatrix(sample_corpus, control = list(wordLengths = c(2, Inf)))
 topic_model<-LDA(DTM, k=10, control = list(seed = 321)) #### Not Working !!!!!!
 # Tidying the model
 topics <- tidy(topic_model, matrix = "beta")
@@ -82,8 +105,6 @@ wordcloud(words = d$word, freq = d$freq, min.freq = 1,
 # Graphing4: visualization of state counts for the sample
 # Building a zipprefix-state df
 data(zipcode)
-#zipprefix <- zipcode
-#zipprefix$zip <- substr(zipprefix$zip, 0, 3) # If only using prefix 
 zip <- zipcode %>% 
   select(zip, state) %>% 
   distinct(zip, .keep_all = TRUE)
