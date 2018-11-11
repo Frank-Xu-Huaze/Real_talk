@@ -1,3 +1,12 @@
+---
+title: "Analysis and Visualization"
+author: "Frank"
+date: "11/11/2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
 library(zipcode)
 library(tidyverse)
 library(usmap)
@@ -7,7 +16,10 @@ library(tm)
 library(topicmodels)
 library(wordcloud)
 library(RColorBrewer)
+library(sentimentr)
+```
 
+```{r}
 # Reading samples
 sample <- read.csv("Real_Talk_Data.csv", stringsAsFactors = FALSE)
 sample <- sample[1:812,]
@@ -19,10 +31,16 @@ sample$Story <- do.call(paste, c(sample[18:127], sep=" "))
 sample <- sample[,c(1:17,128)]
 
 # Clean up
-sample$LGBTQ.[sample$LGBTQ. == ""] <- NA
+sample$LGBTQ.[sample$LGBTQ. == "" | is.na(sample$LGBTQ.) == T] <- "Prefer not to share"
 sample$LGBTQ.[sample$LGBTQ. == "nyes"] <- "yes"
 sample$LGBTQ.[sample$LGBTQ. == "yes "] <- "yes"
 sample$LGBTQ.[sample$LGBTQ. == "on"] <- "no"
+sample$Gender[sample$Gender == "" | is.na(sample$Gender) == T] <- "Prefer not to share"
+sample$Gender[sample$Gender == "abstain" | sample$Gender == "abstain "] <- "Prefer not to share"
+sample$Gender[sample$Gender == "Female"] <- "female"
+sample$Gender[sample$Gender == "Male"] <- "male"
+sample$Gender[sample$Gender == "male "] <- "male"
+sample$Gender[sample$Gender == "Other" | sample$Gender == "non-binary" | sample$Gender == "Non-binary"] <- "other"
 
 # Create a new column of state with zip
 data(zipcode)
@@ -30,17 +48,14 @@ zip <- zipcode %>%
   select(zip, state) %>% 
   distinct(zip, .keep_all = TRUE)
 realtalk <- merge(sample, zip, by = "zip", all.x = TRUE)
+```
 
-# Summary datasets:
-summary(as.factor(realtalk$Submission..Type))
-summary(as.factor(realtalk$Published))
-summary(as.factor(realtalk$Gender))
-boxplot(realtalk$Age)
+```{r}
+sample$sentiment <- sentiment(sample$Story)
+```
 
-
-
-
-
+```{r}
+# Creating Tidytext and Corpus objects
 # Using Tidytext to unnest the dataframe
 sampledf <- sample %>% 
   select(Story) %>% 
@@ -61,7 +76,9 @@ sample_corpus <- tm_map(sample_corpus, content_transformer(stemDocument), langua
 # Creating dtm
 DTM <- DocumentTermMatrix(sample_corpus, control = list(wordLengths = c(2, Inf)))
 TDM <- TermDocumentMatrix(sample_corpus, control = list(wordLengths = c(2, Inf)))
+```
 
+```{r}
 # Graphing1: top 20 words in histogram
 top_20 <- samplesort[1:20,]
 top_20$word <- factor(top_20$word,
@@ -73,9 +90,13 @@ ggplot(top_20, aes(x=word, y=n, fill=word))+
   ylab("Word freq in real talks sample")+
   xlab("")+
   guides(fill=FALSE)
+```
 
+```{r}
 # Graphing2: Corpus & Topic modeling
-topic_model<-LDA(DTM, k=10, control = list(seed = 321)) #### Not Working !!!!!!
+rowTotals <- apply(DTM, 1, sum)
+DTM <- DTM[rowTotals >0, ]
+topic_model<-LDA(DTM, k=10, control = list(seed = 321))
 # Tidying the model
 topics <- tidy(topic_model, matrix = "beta")
 top_terms <- 
@@ -91,7 +112,9 @@ top_terms %>%
   geom_col(show.legend = FALSE) +
   facet_wrap(~ topic, scales = "free") +
   coord_flip()
+```
 
+```{r}
 # Graphing3: Wordcloud
 m <- as.matrix(TDM)
 v <- sort(rowSums(m),decreasing=TRUE)
@@ -101,7 +124,9 @@ set.seed(1234)
 wordcloud(words = d$word, freq = d$freq, min.freq = 1,
           max.words=100, random.order=FALSE, rot.per=0.35, 
           colors=brewer.pal(8, "Dark2"))
+```
 
+```{r}
 # Graphing4: visualization of state counts for the sample
 # Building a zipprefix-state df
 data(zipcode)
@@ -118,5 +143,5 @@ plot_usmap(regions = "states", data = samplecount, values = "n", lines = "red") 
   scale_fill_continuous(low = "white", high = "red", name = "Population (2015)", label = scales::comma) +
   labs(title = "US States", subtitle = "This is a map.") + 
   theme(panel.background = element_rect(colour = "black", fill = "white"), legend.position = "right")
-
+```
 
