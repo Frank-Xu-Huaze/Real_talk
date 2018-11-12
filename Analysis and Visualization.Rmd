@@ -32,14 +32,12 @@ sample <- sample[,c(1:17,128)]
 
 # Clean up
 sample$LGBTQ.[sample$LGBTQ. == "" | is.na(sample$LGBTQ.) == T] <- "Prefer not to share"
-sample$LGBTQ.[sample$LGBTQ. == "nyes"] <- "yes"
-sample$LGBTQ.[sample$LGBTQ. == "yes "] <- "yes"
+sample$LGBTQ.[sample$LGBTQ. == "nyes" | sample$LGBTQ. == "yes "] <- "yes"
 sample$LGBTQ.[sample$LGBTQ. == "on"] <- "no"
 sample$Gender[sample$Gender == "" | is.na(sample$Gender) == T] <- "Prefer not to share"
 sample$Gender[sample$Gender == "abstain" | sample$Gender == "abstain "] <- "Prefer not to share"
 sample$Gender[sample$Gender == "Female"] <- "female"
-sample$Gender[sample$Gender == "Male"] <- "male"
-sample$Gender[sample$Gender == "male "] <- "male"
+sample$Gender[sample$Gender == "Male" | sample$Gender == "male "] <- "male"
 sample$Gender[sample$Gender == "Other" | sample$Gender == "non-binary" | sample$Gender == "Non-binary"] <- "other"
 
 # Create a new column of state with zip
@@ -54,7 +52,7 @@ realtalk <- merge(sample, zip, by = "zip", all.x = TRUE)
 sentiment_score <- sentiment(realtalk$Story) %>% 
   group_by(element_id) %>% 
   summarise(sentiment = sum(sentiment))
-realtalk <- cbind(realtalk, sentiment_score[,2])
+regdata <- cbind(realtalk[, c(1,19,4,10:12,17:18)], sentiment_score[,2])
 ```
 
 ```{r}
@@ -143,7 +141,7 @@ samplecount <- samplestate %>%
   count(state)
 # Plotting
 plot_usmap(regions = "states", data = samplecount, values = "n", lines = "red") + 
-  scale_fill_continuous(low = "white", high = "red", name = "Population (2015)", label = scales::comma) +
+  scale_fill_continuous(low = "white", high = "red", name = "Story Population", label = scales::comma) +
   labs(title = "Real Talk Sample Density in US") + 
   theme(panel.background = element_rect(colour = "black", fill = "white"), legend.position = "right")
 ```
