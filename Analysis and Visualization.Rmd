@@ -51,36 +51,39 @@ realtalk <- merge(sample, zip, by = "zip", all.x = TRUE)
 ```
 
 ```{r}
-sample$sentiment <- sentiment(sample$Story)
+sentiment_score <- sentiment(realtalk$Story) %>% 
+  group_by(element_id) %>% 
+  summarise(sentiment = sum(sentiment))
+realtalk <- cbind(realtalk, sentiment_score[,2])
 ```
 
 ```{r}
 # Creating Tidytext and Corpus objects
 # Using Tidytext to unnest the dataframe
-sampledf <- sample %>% 
+realtalkdf <- realtalk %>% 
   select(Story) %>% 
   unnest_tokens("word", Story)
 # Stopwords
 data("stop_words")
-samplesort <- sampledf %>% 
+realtalksort <- realtalkdf %>% 
   anti_join(stop_words) %>% 
   count(word) %>% 
   arrange(desc(n))
 # Creating Corpus
-sample_corpus <- Corpus(VectorSource(as.vector(sample$Story))) 
-sample_corpus <- tm_map(sample_corpus, removeWords, stopwords("english"))
-sample_corpus <- tm_map(sample_corpus, content_transformer(removeNumbers))
-sample_corpus <- tm_map(sample_corpus, content_transformer(removePunctuation))
-sample_corpus <- tm_map(sample_corpus, content_transformer(tolower))
-sample_corpus <- tm_map(sample_corpus, content_transformer(stemDocument), language = "english")
+realtalk_corpus <- Corpus(VectorSource(as.vector(realtalk$Story))) 
+realtalk_corpus <- tm_map(realtalk_corpus, removeWords, stopwords("english"))
+realtalk_corpus <- tm_map(realtalk_corpus, content_transformer(removeNumbers))
+realtalk_corpus <- tm_map(realtalk_corpus, content_transformer(removePunctuation))
+realtalk_corpus <- tm_map(realtalk_corpus, content_transformer(tolower))
+realtalk_corpus <- tm_map(realtalk_corpus, content_transformer(stemDocument), language = "english")
 # Creating dtm
-DTM <- DocumentTermMatrix(sample_corpus, control = list(wordLengths = c(2, Inf)))
-TDM <- TermDocumentMatrix(sample_corpus, control = list(wordLengths = c(2, Inf)))
+DTM <- DocumentTermMatrix(realtalk_corpus, control = list(wordLengths = c(2, Inf)))
+TDM <- TermDocumentMatrix(realtalk_corpus, control = list(wordLengths = c(2, Inf)))
 ```
 
 ```{r}
 # Graphing1: top 20 words in histogram
-top_20 <- samplesort[1:20,]
+top_20 <- realtalksort[1:20,]
 top_20$word <- factor(top_20$word,
                       levels = top_20$word[order(top_20$n, decreasing = TRUE)])
 ggplot(top_20, aes(x=word, y=n, fill=word))+
@@ -141,7 +144,7 @@ samplecount <- samplestate %>%
 # Plotting
 plot_usmap(regions = "states", data = samplecount, values = "n", lines = "red") + 
   scale_fill_continuous(low = "white", high = "red", name = "Population (2015)", label = scales::comma) +
-  labs(title = "US States", subtitle = "This is a map.") + 
+  labs(title = "Real Talk Sample Density in US") + 
   theme(panel.background = element_rect(colour = "black", fill = "white"), legend.position = "right")
 ```
 
