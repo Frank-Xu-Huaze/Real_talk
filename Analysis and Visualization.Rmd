@@ -17,6 +17,7 @@ library(topicmodels)
 library(wordcloud)
 library(RColorBrewer)
 library(sentimentr)
+library(lme4)
 ```
 
 ```{r}
@@ -40,7 +41,6 @@ sample$Gender[sample$Gender == "Female"] <- "female"
 sample$Gender[sample$Gender == "Male" | sample$Gender == "male "] <- "male"
 sample$Gender[sample$Gender == "Other" | sample$Gender == "non-binary" | sample$Gender == "Non-binary"] <- "other"
 
-# Create a new column of state with zip
 data(zipcode)
 zip <- zipcode %>% 
   select(zip, state) %>% 
@@ -56,6 +56,7 @@ realtalk$sentiment <- sentiment_by(realtalk$Story)[,4]
 realtalk$sentiment <- apply(realtalk$sentiment,2,as.numeric)
 regdata <- realtalk[c(-3,-10,-11,-17,-131,-133,-272,-411,-449,-614,-622,-769,-777,-806), c(1,19,4,10:12,17:18,20)]
 ```
+
 
 ```{r}
 # Creating Tidytext and Corpus objects
@@ -142,7 +143,7 @@ samplecount <- samplestate %>%
   group_by(state) %>% 
   count(state)
 # Plotting
-plot_usmap(regions = "states", data = samplecount, values = "n", lines = "red") + 
+plot_usmap(regions = "states", data = samplecount, values = "n", lines = "grey") + 
   scale_fill_continuous(low = "white", high = "red", name = "Story Population", label = scales::comma) +
   labs(title = "Real Talk Sample Density in US") + 
   theme(panel.background = element_rect(colour = "black", fill = "white"), legend.position = "right")
@@ -152,11 +153,58 @@ plot_usmap(regions = "states", data = samplecount, values = "n", lines = "red") 
 # Graphing5: visualization of mean sentiment score on different states
 sentimentmean <- regdata %>% 
   group_by(state) %>% 
-  summarise(mean_sent = mean(sentiment, na.rm = T))
-sentimentmean <- merge(sentimentmean, samplecount, by = "state", all.x = T)
+  summarise(mean_sent = 10*mean(sentiment, na.rm = T))
+sentimentmean <- merge(sentimentmean, samplecount, by = "state")
+sentimentmean$red <- 0
+sentimentmean$red[c(1:3,5,7,8,10,11,13:16,19:28,33,34,36,38:42,44:46)] <- 1
 # Plotting
-plot_usmap(regions = "states", data = sentimentmean, values = "mean_sent", lines = "red") + 
+plot_usmap(regions = "states", data = sentimentmean, values = "mean_sent", lines = "grey") + 
   scale_fill_continuous(low = "red", high = "white", name = "Sentiment_Score", label = scales::comma) +
   labs(title = "Real Talk Sample Sentiment in US") + 
   theme(panel.background = element_rect(colour = "black", fill = "white"), legend.position = "right")
 ```
+
+# Election and realtalk regression:
+```{r}
+plot_usmap(regions = "states", data = sentimentmean, values = "red", lines = "white") + 
+  scale_fill_continuous(low = "blue", high = "red", name = "Results for 2016 election", label = scales::comma) +
+  labs(title = "Real Talk Sample Sentiment in US") + 
+  theme(panel.background = element_rect(colour = "black", fill = "white"), legend.position = "right")
+```
+
+```{r}
+# Create a new column of state with zip
+regdata <- merge(regdata, sentimentmean[,c(1,4)], by = "state", all.x = TRUE)
+regdata$Gender <- as.factor(regdata$Gender)
+regdata$LGBTQ. <- as.factor(regdata$LGBTQ.)
+regdata$Submission..Type <- as.factor(regdata$Submission..Type)
+regdata$Subject <- as.factor(regdata$Subject)
+names(regdata)[9]<-"sentiment"
+regdata$wordcount <- str_count(regdata$Story, '\\w+')
+plot(sentiment~Age, data = regdata)
+plot(sentiment~Gender, data = regdata)
+plot(sentiment~LGBTQ., data = regdata)
+plot(sentiment~Subject, data = regdata)
+plot(sentiment~Submission..Type, data = regdata)
+plot(sentiment~wordcount, data = regdata)
+hist(regdata$sentiment, breaks =20)
+```
+
+```{r}
+reg <- lm(sentiment ~ Age + Gender + LGBTQ. + Subject + Submission..Type + wordcount + red, data = regdata)
+summary(reg)
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
