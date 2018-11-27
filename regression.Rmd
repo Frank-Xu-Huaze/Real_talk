@@ -71,6 +71,28 @@ sentimentmean$red[c(1:3,5,7,8,10,11,13:16,19:28,33,34,36,38:42,44:46)] <- 1
 ```
 
 ```{r}
+teenpreg14 <- read.csv("TEENBIRTHS2014.csv")
+teenpreg15 <- read.csv("TEENBIRTHS2015.csv")
+teenpreg16 <- read.csv("TEENBIRTHS2016.csv")
+teenpreg <- merge(teenpreg14, teenpreg15, by = "STATE")
+teenpreg <- merge(teenpreg, teenpreg16, by = "STATE")
+teenpreg$rate <- rowMeans(teenpreg[,c(2,4,6)])
+teenpreg <- teenpreg[,c(1,8)]
+colnames(teenpreg) <- c("state", "teen_preg_rate")
+```
+
+```{r}
+suicide <- read.table("Compressed Mortality, 1999-2016.txt", sep = "", header = T, fill = T, nrows = 50)
+suicide <- suicide[,c(1,3:5)]
+colnames(suicide) <- c("State", "death", "population", "suicide_rate")
+for (i in 1:50){
+  suicide$state[i] <- state.abb[grep(suicide[i, 1], state.name)]
+}
+suicide <- suicide[,c(5,4)]
+```
+
+
+```{r}
 # Preprocessing regression data
 if (!"red" %in% colnames(regdata)){
   regdata <- merge(regdata, sentimentmean[,c(1,4)], by = "state", all.x = TRUE)
@@ -91,9 +113,13 @@ regdata$Reg[regdata$state %in% c("AZ", "NM", "OK", "TX")] <- "southwest"
 regdata$Reg[regdata$state %in% c("AR", "LA", "MS", "AL", "GA", "FL", "SC", "NC", "KY", "TN", "WV", "VA", "MD", "DE")] <- "southeast"
 regdata$Reg[regdata$state %in% c("ME", "VT", "NH", "MA", "NY", "RI", "CT", "NJ", "PA")] <- "northeast"
 
+regdata <- merge(regdata, teenpreg, by = "state", all.x = T)
+regdata <- merge(regdata, suicide, by = "state", all.x = T)
+
 # Regdata2 is the datasets with no NA rows
 regdata2 <- regdata[is.na(regdata$state) == F & is.na(regdata$Age) == F,]
 ```
+
 
 ```{r}
 # Basic population visualization
@@ -123,11 +149,30 @@ boxplot(sentiment~Reg, data = regdata2, main = "sentiment ~ different region")
 ```
 
 ```{r}
-reg1 <- glm(sentiment2 ~ Age + Gender + LGBTQ. + Subject + Submission..Type + wordcount + red + Reg, family = binomial, data = regdata2)
-summary(reg1)
-roc(regdata2$sentiment2, fitted(reg1), plot=T, legacy.axes=T)
-binnedplot(x=regdata2$Age, y = regdata2$sentiment2 - fitted(reg1), xlab = "Age", ylab = "Residuals", main = "Binned residuals versus Age")
+ggplot(data = regdata2)+
+  geom_point(aes(y = sentiment, x = LGBTQ.))+
+  facet_wrap(~Reg)
 ```
+```{r}
+reg1 <- glm(sentiment2 ~ Age + Gender + LGBTQ. + Reg + wordcount + Submission..Type + Subject, family = binomial, data = regdata2)
+reg2 <- glm(sentiment2 ~ Age + Gender + LGBTQ. + Reg + wordcount + Submission..Type + Subject + teen_preg_rate, family = binomial, data = regdata2)
+reg3 <- glm(sentiment2 ~ Age + Gender + LGBTQ. + Reg + wordcount + Submission..Type + Subject + suicide_rate, family = binomial, data = regdata2)
+reg4 <- glm(sentiment2 ~ Age + Gender + LGBTQ. + Reg + wordcount + Submission..Type + Subject + red, family = binomial, data = regdata2)
+anova(reg1, reg2, test= "Chisq")
+anova(reg1, reg3, test= "Chisq")
+anova(reg1, reg4, test= "Chisq")
+```
+
+
+```{r}
+reg5 <- glm(sentiment2 ~ Age + Gender + LGBTQ. * Reg + wordcount + Submission..Type + Subject, family = binomial, data = regdata2)
+summary(reg5)
+roc(regdata2$sentiment2, fitted(reg5), plot=T, legacy.axes=T)
+binnedplot(x=regdata2$Age, y = regdata2$sentiment2 - fitted(reg5), xlab = "Age", ylab = "Residuals", main = "Binned residuals versus Age")
+anova(reg1, reg5, test= "Chisq")
+```
+
+
 
 
 

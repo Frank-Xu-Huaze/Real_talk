@@ -1,0 +1,99 @@
+"Notes"	"State"	"State Code"	Deaths	Population	Crude Rate
+	"Alabama"	"01"	175	3166021	5.5
+	"Alaska"	"02"	89	495785	18.0
+	"Arizona"	"04"	310	4558596	6.8
+	"Arkansas"	"05"	138	1978634	7.0
+	"California"	"06"	906	25789414	3.5
+	"Colorado"	"08"	345	3488999	9.9
+	"Connecticut"	"09"	80	2405376	3.3
+	"Delaware"	"10"	33	588524	5.6
+	"Florida"	"12"	551	11590935	4.8
+	"Georgia"	"13"	340	7056894	4.8
+	"Hawaii"	"15"	49	810307	6.0
+	"Idaho"	"16"	127	1188792	10.7
+	"Illinois"	"17"	379	8568863	4.4
+	"Indiana"	"18"	275	4527493	6.1
+	"Iowa"	"19"	147	2083570	7.1
+	"Kansas"	"20"	152	2003202	7.6
+	"Kentucky"	"21"	196	2849546	6.9
+	"Louisiana"	"22"	182	3051572	6.0
+	"Maine"	"23"	60	785193	7.6
+	"Maryland"	"24"	151	3825876	3.9
+	"Massachusetts"	"25"	171	4287505	4.0
+	"Michigan"	"26"	449	6616699	6.8
+	"Minnesota"	"27"	255	3572309	7.1
+	"Mississippi"	"28"	92	2072636	4.4
+	"Missouri"	"29"	271	3945658	6.9
+	"Montana"	"30"	90	629787	14.3
+	"Nebraska"	"31"	90	1284951	7.0
+	"Nevada"	"32"	114	1803917	6.3
+	"New Hampshire"	"33"	48	842030	5.7
+	"New Jersey"	"34"	161	5757684	2.8
+	"New Mexico"	"35"	137	1404014	9.8
+	"New York"	"36"	397	12203234	3.3
+	"North Carolina"	"37"	338	6536778	5.2
+	"North Dakota"	"38"	48	457522	10.5
+	"Ohio"	"39"	415	7640284	5.4
+	"Oklahoma"	"40"	238	2604600	9.1
+	"Oregon"	"41"	203	2427615	8.4
+	"Pennsylvania"	"42"	400	8037343	5.0
+	"Rhode Island"	"44"	23	677111	3.4
+	"South Carolina"	"45"	173	3090233	5.6
+	"South Dakota"	"46"	92	564531	16.3
+	"Tennessee"	"47"	262	4204607	6.2
+	"Texas"	"48"	1050	19526018	5.4
+	"Utah"	"49"	263	2381605	11.0
+	"Vermont"	"50"	30	396051	7.6
+	"Virginia"	"51"	288	5302185	5.4
+	"Washington"	"53"	329	4400224	7.5
+	"West Virginia"	"54"	74	1091840	6.8
+	"Wisconsin"	"55"	261	3775845	6.9
+	"Wyoming"	"56"	52	372165	14.0
+"---"
+"Dataset: Compressed Mortality, 1999-2016"
+"Query Parameters:"
+"Title:"
+"2013 Metro/Nonmetro: All"
+"2013 Urbanization: All"
+"Age Group: 10-14 years, 15-19 years"
+"Gender: All"
+"Hispanic Origin: All"
+"Injury Intent: Suicide"
+"Injury Mechanism & All Other Leading Causes: All"
+"Race: All"
+"States: All"
+"Year: 2012, 2013, 2014, 2015, 2016"
+"Group By: State"
+"Show Totals: Disabled"
+"Show Zero Values: False"
+"Show Suppressed: False"
+"Calculate Rates Per: 100,000"
+"---"
+"Help: See http://wonder.cdc.gov/wonder/help/cmf.html for more information."
+"---"
+"Query Date: Nov 26, 2018 12:35:11 PM"
+"---"
+"Suggested Citation: Centers for Disease Control and Prevention, National Center for Health Statistics. Compressed Mortality File"
+"1999-2016 on CDC WONDER Online Database, released June 2017. Data are from the Compressed Mortality File 1999-2016 Series 20 No."
+"2U, 2016, as compiled from data provided by the 57 vital statistics jurisdictions through the Vital Statistics Cooperative"
+"Program. Accessed at http://wonder.cdc.gov/cmf-icd10.html on Nov 26, 2018 12:35:11 PM"
+"---"
+Messages:
+"1. Totals are not available for these results due to suppression constraints. More Information:"
+"http://wonder.cdc.gov/wonder/help/faq.html#Privacy."
+"2. Rows with suppressed Deaths are hidden. Use Quick Options above to show suppressed rows."
+"---"
+Caveats:
+"1. Due to confidentiality constraints, sub-national death counts and rates are suppressed when the number of deaths is less than"
+"10. Figures representing infant deaths and births have additional constraints for national and local data. More information:"
+"http://wonder.cdc.gov/wonder/help/cmf.html#Assurance of Confidentiality."
+"2. About sub-national population figures for regions, divisions, states and counties: population figures for 1999 are from the"
+"1990-1999 series of bridged-race intercensal estimates of the July 1 resident population; population figures for 2000 and 2010"
+"are bridged-race April 1 census counts; population figures for 2001-2009 are from the revised 2000-2009 series of bridged-race"
+"intercensal estimates of the July 1 resident population; and population figures for 2011-2015 are bridged-race postcensal"
+"estimates of the July 1 resident population, from the Vintage 2015 series released by NCHS on June 28, 2016."
+"3. Deaths of persons with Age ""Not Stated"" are included in ""All"" counts and rates, but are not distributed among age groups,"
+"so are not included in age-specific counts, age-specific rates or in any age-adjusted rates. More information:"
+"http://wonder.cdc.gov/wonder/help/cmf.html#Not Stated."
+"4. As of April 3, 2017, the underlying cause of death has been revised for 125 deaths in 2014. More information:"
+"http://wonder.cdc.gov/wonder/help/cmf.html#2014-Revision."

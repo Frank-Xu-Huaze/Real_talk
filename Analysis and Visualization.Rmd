@@ -18,6 +18,8 @@ library(wordcloud)
 library(RColorBrewer)
 library(sentimentr)
 library(lme4)
+library(arm)
+library(pROC)
 ```
 
 ```{r}
@@ -216,20 +218,39 @@ boxplot(sentiment~Reg, data = regdata2)
 
 ```
 
-
 ```{r}
-hlm <- lmer(sentiment ~  Age + Gender + LGBTQ. + Subject + Submission..Type + wordcount + red + (1 | Reg), data = regdata2) 
-summary(hlm)
+# LGBT proportion
+LGBT <- regdata2 %>%
+  group_by(state) %>% 
+  count(state)
+regdata2$sentiment <- as.numeric(regdata2$sentiment)
+LGBT2 <- filter(regdata2, LGBTQ. == "yes") %>% 
+  group_by(state) %>% 
+  count(state)
+colnames(LGBT2)[2] <- "n2"
+
+LGBT <- merge(LGBT, LGBT2, by = "state", all.x = T)
+LGBT$n2[is.na(LGBT$n2) == T] <- 0
+LGBT$prop <- LGBT$n2 / LGBT$n
+
+allmean <- regdata2 %>% 
+  group_by(state) %>% 
+  summarise(mean_sent = 10 *mean(sentiment))
+allmean2 <- filter(regdata2, LGBTQ. == "yes") %>% 
+  group_by(state) %>% 
+  summarise(mean_sent = 10 *mean(sentiment))
+
+temp <- merge(allmean, allmean2, by = "state", all.x = T)
+
+LGBT <- merge(LGBT, temp, by = "state")
+colnames(LGBT)[2] <- "total count"
+colnames(LGBT)[3] <- "LGBT count"
+colnames(LGBT)[4] <- "LGBT proportion"
+colnames(LGBT)[5] <- "mean total sentiment score"
+colnames(LGBT)[6] <- "mean LGBT sentiment score"
 ```
 
-```{r}
-library(arm)
-library(pROC)
-reg2 <- glm(sentiment2 ~ Age + Gender + LGBTQ. + Subject + Submission..Type + wordcount + red + Reg, family = binomial, data = regdata2)
-summary(reg2)
-roc(regdata2$sentiment2, fitted(reg2), plot=T, legacy.axes=T)
-binnedplot(x=regdata2$Age, y = regdata2$sentiment2 - fitted(reg2), xlab = "Age", ylab = "Residuals", main = "Binned residuals versus Age", nclass = 10)
-```
+
 
 
 
