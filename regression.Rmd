@@ -23,6 +23,7 @@ library(pROC)
 library(lattice)
 ```
 
+"Real Talk" is an online platform aiming for teenagers to talk about their own experiences about relationships, puberty, bullying, etc.. Teenagers post their own stories on the platform, which could be a sentence or a paragraph. Not all stories are available to the public, but my team managed to make contact to them and do some data analysis for them.
 
 ```{r}
 # Reading samples
@@ -66,11 +67,35 @@ regdata <- realtalk[c(-3,-10,-11,-17,-131,-133,-272,-411,-449,-614,-622,-769,-77
 sentimentmean <- regdata %>% 
   group_by(state) %>% 
   summarise(mean_sent = mean(sentiment, na.rm = T))
+
+# Adding election data
 sentimentmean <- merge(sentimentmean, samplecount, by = "state")
 sentimentmean$red <- 0
 sentimentmean$red[c(1:3,5,7,8,10,11,13:16,19:28,33,34,36,38:42,44:46)] <- 1
-
 ```
+
+Reading in data. 
+The original data has 18 columns.
+
+Code Book:
+1. Submission..code: the code id generated for each submission.
+2. Data.of..submission: the exact data for each submission.
+3. Submission..Type: the platform used for each submission.
+4. Location.of..Submission: the location for each submission, only applicable for part of "in person" type submissions. The capital letters stand for middle school names.
+5. Score: scored by certain Real Talk employees deciding whether they should publish the data.
+6. Scored.By: the certain employee that scored the story.
+7. Published: the final decision on whether they will publish the story.
+8. Published.Date: the date of publish, only applicable for stories that already published.
+9. Gender: the gender of the user who published the story. Male/female/other/prefer not to share.
+10. LGBTQ.: the LGBTQ. status of the user who published the story. Yes/no/prefer not to share.
+11. Age: the age of the user who published the story.
+12. Race: the race of the user who published the story.
+13. zip: the zip code users submitted when signing up for the account.
+14. Location: the location users submitted when signing up for the account.
+15. Phone..: the phone numbers users submitted when signing up for the account.
+16. Email.Address: the email address users submitted when signing up for the account.
+17. Subject: the subject of the each story posted. Users had to choose one subject before submitting each stories.
+18. Story: the exact text of story of the each story posted. Can be as shorted as several words, or several sentences.
 
 ```{r}
 teenpreg14 <- read.csv("TEENBIRTHS2014.csv")
@@ -82,6 +107,8 @@ teenpreg$rate <- rowMeans(teenpreg[,c(2,4,6)])
 teenpreg <- teenpreg[,c(1,8)]
 colnames(teenpreg) <- c("state", "teen_preg_rate")
 ```
+
+Also including the teenager pregnancy data
 
 ```{r}
 suicide <- read.table("Compressed Mortality, 1999-2016.txt", sep = "", header = T, fill = T, nrows = 50)
