@@ -1,6 +1,6 @@
 ---
-title: "Regression"
-author: "Frank"
+title: "Final Project - Real Talk data"
+author: "Frank Xu"
 date: "11/19/2018"
 output: html_document
 ---
@@ -31,7 +31,7 @@ library(lattice)
 
 ##### 1. Is there any association between positive/negative sentiment stories and demographic information that come with the stories?
 
-##### 2. Is the positive/negative sentiment stories associate with teenager pregnancy/suicide and political status of each states?
+##### 2. Is the positive/negative sentiment stories associate with some outer source data such as teenager pregnancy/suicide and political status of each states?
 
 ```{r}
 # Reading samples
@@ -277,13 +277,20 @@ exp(confint.default(reg5))
 
 ##### Subject of the story has a strong effect on odds of positive sentiment score. The baseline of "Bullying" has the lowest odds among all, while "Relationships" is the highest, and "puberty" in the middle. The odds of "Relationships" is 87% higher than that of baseline, and "puberty" is 61% higher.(exp(0.625) = 1.87, exp(0.478) = 1.61, 95% CI of (1.09, 3.20) and (0.84, 3.10) repectively)
 
+#### Residuals Examination:
 
 ```{r}
 binnedplot(x=regdata2$Age, y = regdata2$sentiment2 - fitted(reg5), xlab = "Age", ylab = "Residuals", main = "Binned residuals versus Age")
 binnedplot(x=regdata2$wordcountc, y = regdata2$sentiment2 - fitted(reg5), xlab = "wordcount(centered)", ylab = "Residuals", main = "Binned residuals versus wordcount")
+resid1 = regdata2$sentiment2 - fitted(reg5)
+tapply(resid1, regdata2$Gender, mean)
+tapply(resid1, regdata2$LGBTQ., mean)
+tapply(resid1, regdata2$Reg, mean)
+tapply(resid1, regdata2$Submission..Type, mean)
+tapply(resid1, regdata2$Subject, mean)
 ```
 
-#### The Residual binned plots show no clear trends for the used model. The model is reasonable and the assumptions are met.
+#### The Residual binned plots show no clear trends for the used model. The residual tables show no clear bias on the model. The model is reasonable and the assumptions are met.
 
 
 
