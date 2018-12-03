@@ -25,7 +25,7 @@ library(lattice)
 
 #### Data collection:
 
-##### "Real Talk" is an online platform based in UNC aiming for teenagers to talk about their own experiences about relationships, puberty, bullying, etc.. Teenagers from all over US post their own stories on the platform, which could be as short as a sentence, or as long as a paragraph. Not all stories are available to the public, but my team managed to make contact to them, get the data directly from them and do some data analysis for them.
+##### "Real Talk" is an online platform based in UNC aiming for teenagers to talk about their own experiences about relationships, puberty, bullying, etc. Teenagers from all over US post their own stories on the platform, which could be as short as a sentence, or as long as a paragraph. Not all stories are available to the public, but my team managed to make contact to them, get the data directly from them and do some data analysis for them.
 
 #### Question on data:
 
@@ -90,7 +90,7 @@ sentimentmean$red[c(1:3,5,7,8,10,11,13:16,19:28,33,34,36,38:42,44:46)] <- 1
 #### Code Book:
 1. Submission..code: the code id generated for each submission.
 
-2. Data.of..submission: the exact data for each submission.
+2. Date.of..submission: the exact data for each submission.
 
 3. Submission..Type: the platform used for each submission.
 
@@ -190,11 +190,11 @@ regdata2 <- regdata[is.na(regdata$state) == F & is.na(regdata$Age) == F,]
 ```{r}
 # Basic population visualization
 plot_usmap(regions = "states", data = samplecount, values = "n", lines = "grey") + 
-  scale_fill_continuous(low = "#FFCC33", high = "brown", name = "Story Population", label = scales::comma) +
+  scale_fill_continuous(low = "white", high = "red", name = "Story Population", label = scales::comma) +
   labs(title = "Real Talk Sample Density in US") + 
   theme(panel.background = element_rect(colour = "black", fill = "white"), legend.position = "right")
-plot_usmap(regions = "states", data = sentimentmean, values = "mean_sent", lines = "grey") + 
-  scale_fill_continuous(low = "red", high = "white", name = "Sentiment_Score", label = scales::comma) +
+plot_usmap(regions = "states", data = sentimentmean, values = "mean_sent", lines = "white") + 
+  scale_fill_continuous(low = "brown", high = "yellow", name = "Sentiment_Score", label = scales::comma) +
   labs(title = "Real Talk Sample Sentiment in US") + 
   theme(panel.background = element_rect(colour = "black", fill = "white"), legend.position = "right")
 ```
@@ -225,6 +225,7 @@ ggplot(data = regdata2)+
   geom_point(aes(y = sentiment, x = LGBTQ.))+
   facet_wrap(~Reg)
 ```
+
 ```{r}
 # the regression model with no other outer source
 reg1 <- glm(sentiment2 ~ Age + Gender + LGBTQ. + Reg + wordcount + Submission..Type + Subject, family = binomial, data = regdata2)
